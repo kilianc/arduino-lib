@@ -31,7 +31,6 @@
 #include "oscillate.h"
 #include "Arduino.h"
 #include <simple_timer.h>
-#include <stdarg.h>
 
 static int timer_id;
 static int value;

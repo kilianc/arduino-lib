@@ -28,8 +28,6 @@
  *  OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <stdarg.h>
-
 void oscillate(int pin, unsigned long interval, int start_value, char times);
 static void toggle_pin(int arg);
 extern void update_timers();
