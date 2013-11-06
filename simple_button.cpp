@@ -31,12 +31,15 @@
 #include "simple_button.h"
 #include "Arduino.h"
 
-void simple_button_set(unsigned int pin, simple_button_t *button, unsigned int mode, unsigned long held_treshold, unsigned long held_frequency) {
+void simple_button_set(unsigned int pin, simple_button_t *button, unsigned int mode, unsigned long hold_treshold, unsigned long hold_frequency) {
   (*button).pin = pin;
+  (*button).mode = mode;
+  (*button).hold_treshold = hold_treshold;
+  (*button).hold_frequency = hold_frequency;
+  (*button).last_read = (*button).read = mode;
+
   pinMode(pin, INPUT);
-  if (mode) {
-    digitalWrite((*button).pin, HIGH);
-  }
+  if (mode) digitalWrite(pin, HIGH);
 }
 
 int simple_button_read(simple_button_t *button) {
@@ -45,14 +48,14 @@ int simple_button_read(simple_button_t *button) {
   (*button).last_read = ms;
   (*button).previus_read = (*button).read;
   (*button).read = digitalRead((*button).pin);
-  (*button).down = !(*button).read;
-  (*button).up = (*button).read;
+  (*button).down = (*button).mode ? !(*button).read : (*button).read;
+  (*button).up = !(*button).down;
 
   if ((*button).previus_read != (*button).read) {
     (*button).last_change = ms;
-    (*button).last_held = ms;
-    (*button).held = 0;
-    (*button).held_count = 0;
+    (*button).last_hold = ms;
+    (*button).hold = 0;
+    (*button).hold_count = 0;
     (*button).click = !(*button).down;
     (*button).rising_edge = (*button).down;
     (*button).falling_edge = !(*button).down;
@@ -61,21 +64,18 @@ int simple_button_read(simple_button_t *button) {
     (*button).rising_edge = 0;
     (*button).falling_edge = 0;
     (*button).click = 0;
-    // check for held event
-    if ((*button).down && (ms - (*button).last_change) >= (*button).held_treshold && (ms - (*button).last_held) >= (*button).held_frequency) {
-      (*button).held = 1;
-      (*button).held_count++;
-      (*button).last_held = ms;
-      // accelleration y = x / (30 / (x + 25))
-      (*button).value = (*button).held_count / (30 / (*button).held_count + 25);
+    // check for hold event
+    if ((*button).down && (ms - (*button).last_change) >= (*button).hold_treshold && (ms - (*button).last_hold) >= (*button).hold_frequency) {
+      (*button).hold = 1;
+      (*button).hold_count++;
+      (*button).last_hold = ms;
     } else {
-      (*button).held = 0;
-      (*button).value = 0;
+      (*button).hold = 0;
     }
   }
   // trigger callback
-  if ((*button).click && (*button).click_cb != NULL) (*button).click_cb(button);
   if ((*button).rising_edge && (*button).rising_edge_cb != NULL) (*button).rising_edge_cb(button);
   if ((*button).falling_edge && (*button).falling_edge_cb != NULL) (*button).falling_edge_cb(button);
-  if ((*button).held && (*button).held_cb != NULL) (*button).held_cb(button);
+  if ((*button).hold && (*button).hold_cb != NULL) (*button).hold_cb(button);
+  if ((*button).click && (*button).click_cb != NULL) (*button).click_cb(button);
 }

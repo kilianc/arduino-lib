@@ -32,6 +32,7 @@ typedef struct simple_button_struct simple_button_t;
 struct simple_button_struct {
   // digital pin state
   unsigned int pin;
+  unsigned int mode;
   bool previus_read;
   bool read;
   // button state
@@ -41,22 +42,21 @@ struct simple_button_struct {
   bool click;
   bool rising_edge;
   bool falling_edge;
-  bool held;
+  bool hold;
   // callbacks
   void (*click_cb)(simple_button_t *button);
   void (*rising_edge_cb)(simple_button_t *button);
   void (*falling_edge_cb)(simple_button_t *button);
-  void (*held_cb)(simple_button_t *button);
+  void (*hold_cb)(simple_button_t *button);
   // hold
-  unsigned long held_treshold;    // time before the first held event (ms)
-  unsigned long held_frequency;   // frequency after held_treshold of held event (ms)
-  unsigned int held_count;
-  unsigned long value;            // value of button that accellerates proportionally to held_count
+  unsigned long hold_treshold;    // time before the first hold event (ms)
+  unsigned long hold_frequency;   // frequency after hold_treshold of hold event (ms)
+  unsigned int hold_count;
   // private
   unsigned long last_read;
   unsigned long last_change;
-  unsigned long last_held;
+  unsigned long last_hold;
 };
 
-void simple_button_set(unsigned int pin, simple_button_t *button, unsigned int mode, unsigned long held_treshold, unsigned long held_frequency);
+void simple_button_set(unsigned int pin, simple_button_t *button, unsigned int mode, unsigned long hold_treshold, unsigned long hold_frequency);
 int simple_button_read(simple_button_t *button);

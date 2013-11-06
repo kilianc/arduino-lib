@@ -1,6 +1,6 @@
 /*
- *  simple_timer.h
- *  Tiny timer library for Arduino.
+ *  oscillate.h
+ *  Oscillates digital output n times at f frequency.
  *  Created by Kilian Ciuffolo on 11/09/13.
  *  This software is released under the MIT license cited below.
  *
@@ -30,5 +30,6 @@
 
 #include <stdarg.h>
 
-void oscillate(int pin, char times);
-static void toggle_pin(va_list args);
+void oscillate(int pin, unsigned long interval, int start_value, char times);
+static void toggle_pin(int arg);
+extern void update_timers();

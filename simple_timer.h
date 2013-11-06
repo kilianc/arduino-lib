@@ -37,23 +37,26 @@
 
 #include <stdarg.h>
 
-typedef enum { RUNNING, COMPLETE, FULL = -1 } status_t;
+typedef enum { RUNNING = 1, COMPLETE = 0, FULL = -1 } status_t;
 
 typedef struct {
+  unsigned int id;
   status_t status;
   unsigned int interval;
   unsigned long last_call;
   unsigned int repeat;
   unsigned int tick_count;
-  void (*callback)(va_list args);
-  va_list args;
+  void (*callback)(int arg);
+  int arg;
 } timer_t;
 
-int set_repeat(unsigned int interval, void (*callback)(va_list args), int repeat, ...);
-int set_interval(unsigned int interval, void (*callback)(va_list args));
-int set_timeout(unsigned int interval, void (*callback)(va_list args));
+int set_repeat(unsigned int interval, void (*callback)(int arg), int repeat, ...);
+int set_interval(unsigned int interval, void (*callback)(int arg));
+int set_timeout(unsigned int interval, void (*callback)(int arg));
 void update_timers();
 void clear_timer(int id);
-static int get_free_id();
+
+static int get_free_slot_index();
+static unsigned int uuid_gen();
 
 #endif

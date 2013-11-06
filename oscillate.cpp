@@ -1,6 +1,6 @@
 /*
- *  beep.cpp
- *  Piezo buzzer.
+ *  oscillate.cpp
+ *  Oscillates digital output n times at f frequency.
  *  Created by Kilian Ciuffolo on 11/09/13.
  *  This software is released under the MIT license cited below.
  *
@@ -34,17 +34,16 @@
 #include <stdarg.h>
 
 static int timer_id;
-static bool value = 1;
+static int value;
 
-void oscillate(int pin, char times) {
-  value = 1;
+void oscillate(int pin, unsigned long interval, int start_value, char times) {
+  value = start_value;
+  digitalWrite(pin, start_value);
   clear_timer(timer_id);
-  digitalWrite(pin, HIGH);
-  timer_id = set_repeat(100, toggle_pin, times, pin);
+  timer_id = set_repeat(interval, toggle_pin, times, pin);
 }
 
-void toggle_pin(va_list args) {
-  int pin = va_arg(args, int );
+void toggle_pin(int pin) {
   value ^= 1;
   digitalWrite(pin, value);
 }

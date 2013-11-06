@@ -32,68 +32,73 @@
 #include "simple_timer.h"
 #include <stdarg.h>
 
-static timer_t timers_list[___SIMPLE_TIMER_SLOTS___];
+static unsigned int uid;
+static timer_t timers_slots[___SIMPLE_TIMER_SLOTS___];
 
-int set_repeat(unsigned int interval, void (*callback)(va_list args), int repeat, ...) {
+int set_repeat(unsigned int interval, void (*callback)(int arg), int repeat, ...) {
+  int i = get_free_slot_index();
+
+  if (i == FULL)
+    return FULL;
+
+  timers_slots[i].id = uuid_gen();
+  timers_slots[i].status = RUNNING;
+  timers_slots[i].interval = interval;
+  timers_slots[i].last_call = millis();
+  timers_slots[i].repeat = repeat;
+  timers_slots[i].tick_count = 0;
+  timers_slots[i].callback = callback;
+
   // read variable list
   va_list args;
   va_start(args, repeat);
+  timers_slots[i].arg = va_arg(args, int);
   va_end(args);
 
-  int id = get_free_id();
-
-  if (id == FULL)
-    return FULL;
-
-  timer_t timer = timers_list[id];
-
-  timer.status = RUNNING;
-  timer.interval = interval;
-  timer.last_call = 0;
-  timer.repeat = repeat;
-  timer.tick_count = 0;
-  timer.callback = callback;
-  timer.args = args;
-
-  return id;
+  return timers_slots[i].id;
 }
 
-int set_interval(unsigned int interval, void (*callback)(va_list args)) {
+int set_interval(unsigned int interval, void (*callback)(int arg)) {
   return set_repeat(interval, callback, 0);
 }
 
-int set_timeout(unsigned int interval, void (*callback)(va_list args)) {
+int set_timeout(unsigned int interval, void (*callback)(int arg)) {
   return set_repeat(interval, callback, 1);
 }
 
 void update_timers() {
   unsigned int i;
   unsigned long ms = millis();
-  timer_t timer;
 
   for (i = 0; i < ___SIMPLE_TIMER_SLOTS___; ++i) {
-    timer = timers_list[i];
-    if (timer.status == RUNNING && (ms - timer.last_call) >= timer.interval) {
-      timer.last_call = ms;
-      timer.tick_count++;
-      timer.callback(timer.args);
-      if (timer.repeat == timer.tick_count) {
-        timer.status = COMPLETE;
+    if (timers_slots[i].status == RUNNING && (ms - timers_slots[i].last_call) >= timers_slots[i].interval) {
+      timers_slots[i].last_call = ms;
+      timers_slots[i].tick_count++;
+      timers_slots[i].callback(timers_slots[i].arg);
+      if (timers_slots[i].repeat == timers_slots[i].tick_count) {
+        timers_slots[i].status = COMPLETE;
       }
     }
   }
 }
 
 void clear_timer(int id) {
-  if (id < ___SIMPLE_TIMER_SLOTS___)
-    timers_list[id].status = COMPLETE;
-}
-
-int get_free_id() {
   unsigned int i;
   for (i = 0; i < ___SIMPLE_TIMER_SLOTS___; ++i) {
-    if (timers_list[i].status == COMPLETE)
+    if (timers_slots[i].id == id)
+      timers_slots[i].status = COMPLETE;
+  }
+}
+
+int get_free_slot_index() {
+  unsigned int i;
+  for (i = 0; i < ___SIMPLE_TIMER_SLOTS___; ++i) {
+    if (timers_slots[i].status == COMPLETE)
       return i;
   }
   return FULL;
+}
+
+unsigned int uuid_gen() {
+  return uid = (uid + 1) % 65536;
 }
