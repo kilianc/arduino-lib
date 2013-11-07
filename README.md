@@ -2,14 +2,56 @@
 
 ## Index
 
-* [\<simple_button.h\>](#simple-button)
+* [\<arduino-lib.h\>](#arduino-libh)
+* [\<simple_button.h\>](#simple-buttonh)
   * [`simple_button_t`](#simple_button_t)
   * [`simple_button_set`](#simple_button_set)
   * [`simple_button_read`](#simple_button_read)
-* [\<simple_timer.h\>](#simple-timer)
-* [\<oscillate.h\>](#oscillate)
-* [\<utils.h\>](#utils)
-* [\<SerialLCD.h\>](#SerialLCD)
+* [\<simple_timer.h\>](#simple-timerh)
+  * [`___SIMPLE_TIMER_SLOTS___`](#___SIMPLE_TIMER_SLOTS___)
+  * [`set_repeat`](#set_repeat)
+  * [`set_interval`](#set_interval)
+  * [`set_timeout`](#set_timeout)
+  * [`update_timers`](#update_timers)
+  * [`clear_timer`](#clear_timer)
+* [\<oscillate.h\>](#oscillateh)
+  * [`oscillate`](#oscillate)
+* [\<utils.h\>](#utilsh)
+  * [`free_ram`](#free_ram)
+  * [`seconds_to_digits`](#seconds_to_digits)
+* [\<SerialLCD.h\>](#SerialLCDh)
+  * [`SerialLCD`](#SerialLCD)
+  * [`begin`](#begin)
+  * [`toggleSplash`](#toggleSplash)
+  * [`clearDisplay`](#clearDisplay)
+  * [`debugLevel`](#debugLevel)
+  * [`backLight`](#backLight)
+  * [`eraseBlock`](#eraseBlock)
+  * [`reset`](#reset)
+  * [`baudRate`](#baudRate)
+  * [`setPixel`](#setPixel)
+  * [`filledBox`](#filledBox)
+  * [`reverseMode`](#reverseMode)
+  * [`bitblt`](#bitblt)
+  * [`placeCursor`](#placeCursor)
+  * [`writeString`](#writeString)
+
+# Installation
+
+Download the library from [here](https://github.com/kilianc/arduino-lib/archive/master.zip) or
+using git `git clone https://github.com/kilianc/arduino-lib`. On OSX/Linux create a symbolic link
+to your Arduino folder:
+
+    $ ln -s /path/to/arduino-lib/lib /path/to/Arduino/libraries/arduinolib
+
+It's important that you use `arduinolib` and not `arduino-lib` as folder name because Arduino IDE
+is a little too picky about libraries' name.
+
+If you are on Windows *(and I feel terribly sorry for you btw)* you can always just copy/paste
+the library in the right place.
+
+# \<arduino-lib.h\>
+All-in header file. Include this in your sketch and you are ready to use the whole library.
 
 # \<simple_button.h\>
 C style lightweight button library. Defines two functions, [`simple_button_set`](#simple_button_set)
@@ -19,7 +61,7 @@ It's pretty straight forward to use, declare a [`simple_button_t`](#simple_butto
 after configuring it with [`simple_button_set`](#simple_button_set) you are ready to update its
 status with [`simple_button_read`](#simple_button_read) inside your `loop` function.
 
-It supports both **callbacks** and **conditional block** evets style.
+It supports both **callbacks** and **conditional block** events style.
 
 ## Quick look
 
@@ -174,6 +216,8 @@ void loop() {
   //... now you can use flags and read the status on btn1.
 }
 ```
+
+# \<simple_timer.h\>
 
 ## License
 
