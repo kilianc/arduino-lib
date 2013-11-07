@@ -1,6 +1,9 @@
 /*
- *  oscillate.h
+ *  oscillate.cpp
  *  Oscillates digital output n times at f frequency.
+ *
+ *  https://github.com/kilianc/arduino-lib
+ *
  *  Created by Kilian Ciuffolo on 11/09/13.
  *  This software is released under the MIT license cited below.
  *
@@ -28,6 +31,21 @@
  *  OTHER DEALINGS IN THE SOFTWARE.
  */
 
-void oscillate(int pin, unsigned long interval, int start_value, char times);
-static void toggle_pin(int arg);
-extern void update_timers();
+#include "oscillate.h"
+#include "Arduino.h"
+#include <simple_timer.h>
+
+static int timer_id;
+static int value;
+
+void oscillate(int pin, unsigned long interval, int start_value, char times) {
+  value = start_value;
+  digitalWrite(pin, start_value);
+  clear_timer(timer_id);
+  timer_id = set_repeat(interval, toggle_pin, times, pin);
+}
+
+void toggle_pin(int pin) {
+  value ^= 1;
+  digitalWrite(pin, value);
+}

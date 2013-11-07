@@ -1,7 +1,10 @@
 /*
- *  simple_timer.h
- *  Tiny timer library for Arduino.
+ *  utils.h
+ *  Uncategorized utilities for Atmega328/Arduino.
  *  Created by Kilian Ciuffolo on 11/09/13.
+ *
+ *  https://github.com/kilianc/arduino-lib
+ *
  *  This software is released under the MIT license cited below.
  *
  *  Copyright (c) 2010 Kilian Ciuffolo, me@nailik.org. All Rights Reserved.
@@ -28,35 +31,5 @@
  *  OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef ___SIMPLE_TIMER_SLOTS___
-#define ___SIMPLE_TIMER_SLOTS___ 5
-#endif
-
-#ifndef ___SIMPLE_TIMER___
-#define ___SIMPLE_TIMER___
-
-#include <stdarg.h>
-
-typedef enum { RUNNING = 1, COMPLETE = 0, FULL = -1 } status_t;
-
-typedef struct {
-  unsigned int id;
-  status_t status;
-  unsigned int interval;
-  unsigned long last_call;
-  unsigned int repeat;
-  unsigned int tick_count;
-  void (*callback)(int arg);
-  int arg;
-} timer_t;
-
-int set_repeat(unsigned int interval, void (*callback)(int arg), int repeat, ...);
-int set_interval(unsigned int interval, void (*callback)(int arg));
-int set_timeout(unsigned int interval, void (*callback)(int arg));
-void update_timers();
-void clear_timer(int id);
-
-static int get_free_slot_index();
-static unsigned int uuid_gen();
-
-#endif
+int free_ram();
+void seconds_to_digits(int seconds, char digits[]);

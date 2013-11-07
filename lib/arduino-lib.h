@@ -1,6 +1,9 @@
 /*
- *  simple_button.h
- *  Stupid simple button library for Arduino.
+ *  arduino-lib.h
+ *  Utility header for arduino-lib library pack.
+ *
+ *  https://github.com/kilianc/arduino-lib
+ *
  *  Created by Kilian Ciuffolo on 11/09/13.
  *  This software is released under the MIT license cited below.
  *
@@ -28,35 +31,8 @@
  *  OTHER DEALINGS IN THE SOFTWARE.
  */
 
-typedef struct simple_button_struct simple_button_t;
-struct simple_button_struct {
-  // digital pin state
-  unsigned int pin;
-  unsigned int mode;
-  bool previus_read;
-  bool read;
-  // button state
-  bool down;
-  bool up;
-  // event flags
-  bool click;
-  bool rising_edge;
-  bool falling_edge;
-  bool hold;
-  // callbacks
-  void (*click_cb)(simple_button_t *button);
-  void (*rising_edge_cb)(simple_button_t *button);
-  void (*falling_edge_cb)(simple_button_t *button);
-  void (*hold_cb)(simple_button_t *button);
-  // hold
-  unsigned long hold_treshold;    // time before the first hold event (ms)
-  unsigned long hold_frequency;   // frequency after hold_treshold of hold event (ms)
-  unsigned int hold_count;
-  // private
-  unsigned long last_read;
-  unsigned long last_change;
-  unsigned long last_hold;
-};
-
-void simple_button_set(unsigned int pin, simple_button_t *button, unsigned int mode, unsigned long hold_treshold, unsigned long hold_frequency);
-int simple_button_read(simple_button_t *button);
+#include "oscillate.h"
+#include "SerialLCD.h"
+#include "simple_button.h"
+#include "simple_timer.h"
+#include "utils.h"

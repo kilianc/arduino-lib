@@ -2,6 +2,9 @@
  *  simple_button.cpp
  *  Stupid simple button library for Arduino.
  *  Created by Kilian Ciuffolo on 11/09/13.
+ *
+ *  https://github.com/kilianc/arduino-lib
+ *
  *  This software is released under the MIT license cited below.
  *
  *  Copyright (c) 2010 Kilian Ciuffolo, me@nailik.org. All Rights Reserved.

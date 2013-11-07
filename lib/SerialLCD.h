@@ -1,9 +1,12 @@
 /*
  *  SerialLCD.cpp
  *  Driver for 128x64 LCD by Sparkfun with custom firmware.
- *  LCD https://www.sparkfun.com/products/710
- *  Serial Backpack https://www.sparkfun.com/products/9352
- *  Custom Firmware http://serialglcd.sourceforge.net/
+ *   - LCD https://www.sparkfun.com/products/710
+ *   - Serial Backpack https://www.sparkfun.com/products/9352
+ *   - Custom Firmware http://serialglcd.sourceforge.net/
+ *
+ *  https://github.com/kilianc/arduino-lib
+ *
  *  Created by Kilian Ciuffolo on 11/09/13.
  *  This software is released under the MIT license cited below.
  *

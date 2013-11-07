@@ -2,6 +2,9 @@
  *  simple_timer.cpp
  *  Tiny timer library for Arduino.
  *  Created by Kilian Ciuffolo on 11/09/13.
+ *
+ *  https://github.com/kilianc/arduino-lib
+ *
  *  This software is released under the MIT license cited below.
  *
  *  Copyright (c) 2010 Kilian Ciuffolo, me@nailik.org. All Rights Reserved.
@@ -32,17 +35,28 @@
 #include "simple_timer.h"
 #include <stdarg.h>
 
+typedef struct {
+  unsigned int id;
+  unsigned int is_running;
+  unsigned int interval;
+  unsigned long last_call;
+  unsigned int repeat;
+  unsigned int tick_count;
+  void (*callback)(int arg);
+  int arg;
+} timer_t;
+
 static unsigned int uid;
 static timer_t timers_slots[___SIMPLE_TIMER_SLOTS___];
 
 int set_repeat(unsigned int interval, void (*callback)(int arg), int repeat, ...) {
   int i = get_free_slot_index();
 
-  if (i == FULL)
-    return FULL;
+  if (i == -1)
+    return -1;
 
   timers_slots[i].id = uuid_gen();
-  timers_slots[i].status = RUNNING;
+  timers_slots[i].is_running = 1;
   timers_slots[i].interval = interval;
   timers_slots[i].last_call = millis();
   timers_slots[i].repeat = repeat;
@@ -71,12 +85,12 @@ void update_timers() {
   unsigned long ms = millis();
 
   for (i = 0; i < ___SIMPLE_TIMER_SLOTS___; ++i) {
-    if (timers_slots[i].status == RUNNING && (ms - timers_slots[i].last_call) >= timers_slots[i].interval) {
+    if (timers_slots[i].is_running && (ms - timers_slots[i].last_call) >= timers_slots[i].interval) {
       timers_slots[i].last_call = ms;
       timers_slots[i].tick_count++;
       timers_slots[i].callback(timers_slots[i].arg);
       if (timers_slots[i].repeat == timers_slots[i].tick_count) {
-        timers_slots[i].status = COMPLETE;
+        timers_slots[i].is_running = 0;
       }
     }
   }
@@ -86,17 +100,17 @@ void clear_timer(int id) {
   unsigned int i;
   for (i = 0; i < ___SIMPLE_TIMER_SLOTS___; ++i) {
     if (timers_slots[i].id == id)
-      timers_slots[i].status = COMPLETE;
+      timers_slots[i].is_running = 0;
   }
 }
 
 int get_free_slot_index() {
   unsigned int i;
   for (i = 0; i < ___SIMPLE_TIMER_SLOTS___; ++i) {
-    if (timers_slots[i].status == COMPLETE)
+    if (!timers_slots[i].is_running)
       return i;
   }
-  return FULL;
+  return -1;
 }
 
 unsigned int uuid_gen() {

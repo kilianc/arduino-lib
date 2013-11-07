@@ -1,6 +1,9 @@
 /*
- *  utils.cpp
- *  Uncategorized utilities for Atmega328/Arduino.
+ *  oscillate.h
+ *  Oscillates digital output n times at f frequency.
+ *
+ *  https://github.com/kilianc/arduino-lib
+ *
  *  Created by Kilian Ciuffolo on 11/09/13.
  *  This software is released under the MIT license cited below.
  *
@@ -28,20 +31,6 @@
  *  OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "utils.h"
-
-int free_ram() {
-  extern int __heap_start, *__brkval;
-  int v;
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-}
-
-void seconds_to_digits(int seconds, char digits[]) {
-  char m = (char)(seconds / 60);
-  char s = (char)(seconds % 60);
-
-  digits[0] = (char)(m / 10);
-  digits[1] = (char)(m % 10);
-  digits[2] = (char)(s / 10);
-  digits[3] = (char)(s % 10);
-}
+void oscillate(int pin, unsigned long interval, int start_value, char times);
+static void toggle_pin(int arg);
+extern void update_timers();
