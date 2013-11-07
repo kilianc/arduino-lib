@@ -54,11 +54,11 @@ int simple_button_read(simple_button_t *button) {
   if ((*button).previus_read != (*button).read) {
     (*button).last_change = ms;
     (*button).last_hold = ms;
-    (*button).hold = 0;
-    (*button).hold_count = 0;
-    (*button).click = !(*button).down;
     (*button).rising_edge = (*button).down;
+    (*button).hold = 0;
     (*button).falling_edge = !(*button).down;
+    (*button).click = !(*button).hold_count && (*button).up ? 1 : 0;
+    (*button).hold_count = 0;
   } else {
     // nothing changed then clear event flags
     (*button).rising_edge = 0;
@@ -73,7 +73,7 @@ int simple_button_read(simple_button_t *button) {
       (*button).hold = 0;
     }
   }
-  // trigger callback
+  // trigger callbacks
   if ((*button).rising_edge && (*button).rising_edge_cb != NULL) (*button).rising_edge_cb(button);
   if ((*button).falling_edge && (*button).falling_edge_cb != NULL) (*button).falling_edge_cb(button);
   if ((*button).hold && (*button).hold_cb != NULL) (*button).hold_cb(button);

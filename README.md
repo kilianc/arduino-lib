@@ -3,13 +3,23 @@
 ## Index
 
 * [\<simple_button.h\>](#simple-button)
+  * [`simple_button_t`](#simple_button_t)
+  * [`simple_button_set`](#simple_button_set)
+  * [`simple_button_read`](#simple_button_read)
 * [\<simple_timer.h\>](#simple-timer)
 * [\<oscillate.h\>](#oscillate)
 * [\<utils.h\>](#utils)
 * [\<SerialLCD.h\>](#SerialLCD)
 
-# Simple Button \<simple_button.h\>
-C style lightweight button library. Defines two functions, [`simple_button_set`]() [`simple_button_read`]() and a type, [`simple_button_t`]().
+# \<simple_button.h\>
+C style lightweight button library. Defines two functions, [`simple_button_set`](#simple_button_set)
+[`simple_button_read`](#simple_button_read) and a type, [`simple_button_t`](#simple_button_t).
+
+It's pretty straight forward to use, declare a [`simple_button_t`](#simple_button_t) variable and
+after configuring it with [`simple_button_set`](#simple_button_set) you are ready to update its
+status with [`simple_button_read`](#simple_button_read) inside your `loop` function.
+
+It supports both **callbacks** and **conditional block** evets style.
 
 ## Quick look
 
@@ -82,36 +92,6 @@ void loop() {
 }
 ```
 
-## `button_set`
-
-```c
-void simple_button_set(unsigned int pin,
-                button_t *button,
-                unsigned int mode,
-                unsigned long hold_treshold,
-                unsigned long hold_frequency);
-```
-
-* **pin** *(unsigned int)*:	 Digital pin number. This is the **Arduino pin map index** not the MC pin number.
-* **button** (**button_t*): Pointer to the [**`simple_button_t`**]() variable to configure.
-* **mode** (*unsigned int*): Digital logic mode for the button; can be `HIGH` or `LOW`.
-* **hold_treshold** (*unsigned long*): Amount of milliseconds to wait before triggering the first [**`hold`**]() event.
-* **hold_frequency** (*unsigned long*): Amount of seconds between each [**`hold`**]() event after `hold_treshold`.
-
-Configures the microcontroller digital port and the `button_t` passed reference.
-If you pass `HIGH` as [`mode`]() it will activate the [*Atmega** internal pullup resistor*](http://arduino.cc/en/Tutorial/DigitalPins)
-and invert the button logic from *active high* to *active low*.
-
-The two formal parameters [`hold_treshold`]() and [`hold_frequency`]() represent the number
-of millisecond that the library should wait before triggering the [**hold**](#hold_event) event
-the first time *(treshold)* and all consuquent times *(frequency)*.
-
-## `simple_button_read`
-
-```c
-int simple_button_read(button_t *button);
-```
-
 ## `simple_button_t`
 
 ```c
@@ -119,28 +99,78 @@ typedef struct simple_button_struct simple_button_t;
 ```
 
 The type used by the library to store the button status across digital reads based on `simple_button_struct`.
+Below the struct available data:
 
-### Read only
+### Status (read only)
+You should **never** change these values manually. They are supposed to be manipulated only
+by [`simple_button_set`](#simple_button_set) and [`simple_button_read`](#simple_button_read) functions.
+
 * **pin** `unsigned int`:
-* **read** `bool`:
-* **down** `bool`:
-* **up** `bool`:
-* **click** `bool`:
-* **rising_edge** `bool`:
-* **falling_edge** `bool`:
-* **hold** `bool`:
-* **hold_count** `unsigned int`:
+* **read** `bool`: Digital I/O state from the microcontroller.
+* **down** `bool`: Logical button state, 1 if the button **is pressed**.
+* **up** `bool`: Logical button state, 1 if the button **is not pressed**.
+* **hold_count** `unsigned int`: Counts how many hold events have been triggered, resets on `falling_edge`.
 
-### Callbacks
+### Events flags (read only)
+These flags are set to `0` or `1` after every [`simple_button_read`](#simple_button_read)
+if the corrispondent event has been triggered. Every flag is set to `1` only once per event,
+that means that you can use a conditional block to act consequently after an event.
 
-click_cb void (*)(simple_button_t *button)
-rising_edge_cb void (*)(simple_button_t *button)
-falling_edge_cb void (*)(simple_button_t *button)
-hold_cb void (*)(simple_button_t *button)
+* **rising_edge** `bool`: Triggers when the logical state changes from `LOW` to `HIGH` (button is pressed).
+* **hold** `bool`: Triggers every `hold_frequency` ms after `hold_treshold` ms while holding the button down.
+* **falling_edge** `bool`: Triggers when the logical state changes from `HIGH` to `LOW` (button is released).
+* **click** `bool`: Triggers when the logical state changes quickly from `LOW` to `HIGH`.
 
-## Events flags
+### Events Callbacks (read write)
+Callbacks are pointers to user defined functions that will be called passing the button target of the event
+as actual parameter. If the function pointer is NULL the callback is ignored. Callbacks are called
+after every [`simple_button_read`](#simple_button_read) if required. [Event flags](#events-flag-read-only) are still set.
 
-* click
-* rising_edge
-* falling_edge
-* hold
+* **rising_edge_cb** `void (*)(simple_button_t *)`: Called once when the `rising_edge` flag is `1`.
+* **hold_cb** `void (*)(simple_button_t *)`: once Callethe d when `hold` flag is `1`.
+* **falling_edge_cb** `void (*)(simple_button_t *)`: Called wonce hen `the falling_edge` flag is `1`.
+* **click_cb** `void (*)(simple_button_t *)`:  once Callethe d when click` flag is `1`.`
+
+## `simple_button_set`
+
+```c
+void simple_button_set(unsigned int pin,
+                       simple_button_t *button,
+                       unsigned int mode,
+                       unsigned long hold_treshold,
+                       unsigned long hold_frequency);
+```
+
+* **pin** `unsigned int`:	 Digital pin number. This is the [Arduino pin map index](http://arduino.cc/en/Hacking/PinMapping168).
+* **button** `simple_button_t`: Pointer to the [**`simple_button_t`**](#simple_button_t) variable to configure.
+* **mode** `unsigned int: Digital logic mode for the button; can be `HIGH` or `LOW`.
+* **hold_treshold** `unsigned long`: Amount of milliseconds to wait before triggering the first [**`hold`**](#events-flags-read-only) event.
+* **hold_frequency** `unsigned long`: Amount of seconds between each [**`hold`**](#events-flags-read-only) event after `hold_treshold`.
+
+Configures the microcontroller digital port and the [`simple_button_t`](#simple_button_t) passed reference.
+If you pass `HIGH` as `mode` it will activate the [*Atmega** internal pullup resistor*](http://arduino.cc/en/Tutorial/DigitalPins)
+and invert the button logic from *active high* to *active low*.
+
+The two formal parameters `hold_treshold` and `hold_frequency` represent the number
+of millisecond that the library should wait before triggering the [**hold**](#events-flags-read-only) event
+the first time *(treshold)* and all consequent times *(frequency)*.
+
+## `simple_button_read`
+
+```c
+int simple_button_read(simple_button_t *button);
+```
+* **button** `simple_button_t *`: Pointer to the event target aka the button variable associated with the event.
+
+This function reads the digital input from the microcontroller and updates the status of `button` accordingly.
+If required the function calls [events callbacks](#events-callbacks-read-write) and sets [event flags](#events-flags-read-only).
+You should call this function for each `simple_button_t` variable at the very top of your loop function, before any logic code.
+
+### Example
+
+```c++
+void loop() {
+  simple_button_read(&btn1); // updates btn1 state and calls callbacks
+  //... now you can use flags and read the status on btn1.
+}
+```
