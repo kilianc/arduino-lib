@@ -304,7 +304,7 @@ Updates timers state and calls the callbacks if necessary. It needs to be called
 
 ```c
 void clear_timer(unsigned int id)
-``
+```
 
 * **id** `unsigned int`: The unique id of the timer you want to clear.
 
