@@ -3,11 +3,11 @@
 ## Index
 
 * [\<arduino-lib.h\>](#arduino-libh)
-* [\<simple_button.h\>](#simple-buttonh)
+* [\<simple_button.h\>](#simple_buttonh)
   * [`simple_button_t`](#simple_button_t)
   * [`simple_button_set`](#simple_button_set)
   * [`simple_button_read`](#simple_button_read)
-* [\<simple_timer.h\>](#simple-timerh)
+* [\<simple_timer.h\>](#simple_timerh)
   * [`___SIMPLE_TIMER_SLOTS___`](#___SIMPLE_TIMER_SLOTS___)
   * [`set_repeat`](#set_repeat)
   * [`set_interval`](#set_interval)
@@ -147,7 +147,7 @@ Below the struct available data:
 You should **never** change these values manually. They are supposed to be manipulated only
 by [`simple_button_set`](#simple_button_set) and [`simple_button_read`](#simple_button_read) functions.
 
-* **pin** `unsigned int`:
+* **pin** `unsigned int`: Digital pin number. This is the [Arduino pin map index](http://arduino.cc/en/Hacking/PinMapping168).
 * **read** `bool`: Digital I/O state from the microcontroller.
 * **down** `bool`: Logical button state, 1 if the button **is pressed**.
 * **up** `bool`: Logical button state, 1 if the button **is not pressed**.
@@ -169,9 +169,9 @@ as actual parameter. If the function pointer is NULL the callback is ignored. Ca
 after every [`simple_button_read`](#simple_button_read) if required. [Event flags](#events-flag-read-only) are still set.
 
 * **rising_edge_cb** `void (*)(simple_button_t *)`: Called once when the `rising_edge` flag is `1`.
-* **hold_cb** `void (*)(simple_button_t *)`: once Callethe d when `hold` flag is `1`.
-* **falling_edge_cb** `void (*)(simple_button_t *)`: Called wonce hen `the falling_edge` flag is `1`.
-* **click_cb** `void (*)(simple_button_t *)`:  once Callethe d when click` flag is `1`.`
+* **hold_cb** `void (*)(simple_button_t *)`: Called once when the `hold` flag is `1`.
+* **falling_edge_cb** `void (*)(simple_button_t *)`: Called once when `the falling_edge` flag is `1`.
+* **click_cb** `void (*)(simple_button_t *)`: Called once when the `click` flag is `1`.`
 
 ## `simple_button_set`
 
@@ -218,6 +218,260 @@ void loop() {
 ```
 
 # \<simple_timer.h\>
+C style timer library, *stupid simple*.
+Every other library out there is either huge of memory consuming or more luckely buggy.
+Even the [Timer](http://playground.arduino.cc/Code/Timer) doesn't support concurrency properly.
+
+This library uses arduino `millis()` function internally, so it will not work if you plan to play
+with [timers interrupts](http://arduino.cc/en/Reference/Interrupts) manually, as `millis()` `delay()` wouldn't work either.
+
+## `___SIMPLE_TIMER_SLOTS___`
+
+```c
+#ifndef ___SIMPLE_TIMER_SLOTS___
+#define ___SIMPLE_TIMER_SLOTS___ 5
+#endif
+```
+
+Represents the maximum allowed concurrency of running timers. This tells the library to allocate enough space
+to monitor and update n `___SIMPLE_TIMER_SLOTS___` overlapping timers. If you plan to use just one timer at time
+you can low this number down and save some memory (50 bytes/timer).
+
+*Maximum concurrency is 65536 default is 5*.
+
+### Example
+
+```c
+#define ___SIMPLE_TIMER_SLOTS___ 1
+#include <arduino-lib.h>
+```
+
+## `set_repeat`
+
+```c
+int set_repeat(unsigned int interval, void (*callback)(int arg), unsigned int repeat, ...)
+```
+
+* **interval** `unsigned int`: Number of milliseconds to wait before each call to `callback`.
+* **callback** `void (*)(int arg)`: Function to be called repeatedly every `interval` ms `repeat` times.
+* **repeat** `unsigned int`:  Times the callback will be called.
+* **...** `int`:  Optional parameter forwarded to the callback.
+
+This is the core function of the library, all other functions will refer to this.
+The function creates a new timer that will call `callback` every `interval` ms for `repeat` times
+passing the last optional parameter as actual parameter of `callback`. If you omit the optional
+parameter `callback` will be called with `arg=0`.
+
+Returns the **unique id** of the timer to be used with [`clear_timer`](#clear_timer) to stop it.
+
+## `set_interval`
+
+```c
+int set_interval(unsigned int interval, void (*callback)(int arg))
+```
+
+* **interval** `unsigned int`: Number of milliseconds to wait before each call to `callback`.
+* **callback** `void (*)(int arg)`: Function to be called repeatedly every `interval` ms `repeat` times.
+
+Similarly to [`set_repeat`](#set_repeat) calls repeatedly `callback` every `interval` ms **infinitely**.
+
+Returns the **unique id** of the timer to be used with [`clear_timer`](#clear_timer) to stop it.
+
+## `set_timeout`
+
+```c
+int set_timeout(unsigned int interval, void (*callback)(int arg))
+```
+
+* **interval** `unsigned int`: Number of milliseconds to wait before each call to `callback`.
+* **callback** `void (*)(int arg)`: Function to be called repeatedly every `interval` ms `repeat` times.
+
+Similarly to [`set_repeat`](#set_repeat) calls repeatedly `callback` every `interval` ms **just once**.
+
+Returns the **unique id** of the timer to be used with [`clear_timer`](#clear_timer) to stop it.
+
+## `update_timers`
+
+```c
+void update_timers()
+```
+
+Updates timers state and calls the callbacks if necessary. It needs to be called within your
+`loop` function repeatedly or your timers will never trigger.
+
+## `clear_timer`
+
+```c
+void clear_timer(unsigned int id)
+``
+
+* **id** `unsigned int`: The unique id of the timer you want to clear.
+
+Stops and clears the timer associated with `id`. The timer will be discarded,
+no furter calls to `callback` will happen and the timer slot will be freed.
+
+Multiple calls with the same `id` don't trigger any error, same behavior for already expired
+timers or non existent timer ids. It deals with it silently.
+
+# \<oscillate.h\>
+
+## `oscillate`
+
+```c
+int oscillate(int pin, unsigned long interval, int start_value, char times)
+```
+
+* **pin** `unsigned int`: Digital pin number. This is the [Arduino pin map index](http://arduino.cc/en/Hacking/PinMapping168).
+* **interval** `unsigned long`: Number of milliseconds to wait before each `digitalWrite`.
+* **start_value** `int`: The value to be instantly written to `pin`, reversed after each `interval` ms.
+* **times** `char`: Number of times the `pin` value will oscillate. Use 0 for infinity.
+
+Oscillates the value of the digital `pin` between `HIGH` and `LOW` `times`/2 times starting from
+`start_value`. `start_value` will be written instantly to the `pin`.
+
+Every `interval` ms the value of `pin` will be reversed.
+
+Returns the **unique id** of the internal timer, you can use the `id` with [`clear_timer`](#clear_timer) to stop it.
+
+*Since it uses a timer internally (this is just a wrapper around [`set_repeat`](#set_repeat)),
+you have to call [`update_timers`](#update_timers) as you would do with a timer,
+otherwise the oscillation will not happen*.
+
+### Example
+
+```c
+int osc_id, int osc_id2;
+
+void setup() {
+  // will set pin 13 from LOW to HIGH and from HIGH to LOW 3 times
+  osc_id = = oscillate(13, 200, LOW, 3);
+
+  // will not run
+  osc_id2 = oscillate(13, 200, LOW, 3);
+}
+
+void loop() {
+  update_timers();
+  clear_timer(osc_id2);
+}
+```
+
+# \<utils.h\>
+
+Collection of uncategorized function.
+
+## `free_ram`
+
+```c
+int free_ram()
+```
+Supposedly returns the amount of free RAM in bytes. Still a WIP.
+
+## `seconds_to_digits`
+
+```c
+void seconds_to_digits(int seconds, char digits[])
+```
+
+Given an amount of `seconds` it will populate the `digit` array with
+a zero padded minute/seconds string "mm:ss".
+
+I used this in my [atmega328-timer-relay](https://github.com/kilianc/atmega328-timer-relay) project.
+
+# \<SerialLCD.h\>
+
+
+
+## `SerialLCD`
+
+```c
+
+```
+
+## `begin`
+
+```c
+
+```
+
+## `toggleSplash`
+
+```c
+
+```
+
+## `clearDisplay`
+
+```c
+
+```
+
+## `debugLevel`
+
+```c
+
+```
+
+## `backLight`
+
+```c
+
+```
+
+## `eraseBlock`
+
+```c
+
+```
+
+## `reset`
+
+```c
+
+```
+
+## `baudRate`
+
+```c
+
+```
+
+## `setPixel`
+
+```c
+
+```
+
+## `filledBox`
+
+```c
+
+```
+
+## `reverseMode`
+
+```c
+
+```
+
+## `bitblt`
+
+```c
+
+```
+
+## `placeCursor`
+
+```c
+
+```
+
+## `writeString`
+
+```c
+
+```
+
 
 ## License
 
