@@ -38,11 +38,12 @@
 static int timer_id;
 static int value;
 
-void oscillate(int pin, unsigned long interval, int start_value, char times) {
+int oscillate(int pin, unsigned long interval, int start_value, char times) {
   value = start_value;
   digitalWrite(pin, start_value);
   clear_timer(timer_id);
   timer_id = set_repeat(interval, toggle_pin, times, pin);
+  return timer_id;
 }
 
 void toggle_pin(int pin) {

@@ -31,6 +31,7 @@
  *  OTHER DEALINGS IN THE SOFTWARE.
  */
 
-void oscillate(int pin, unsigned long interval, int start_value, char times);
+int oscillate(int pin, unsigned long interval, int start_value, char times);
 static void toggle_pin(int arg);
 extern void update_timers();
+extern void clear_timer(unsigned int id);
