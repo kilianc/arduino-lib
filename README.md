@@ -327,12 +327,14 @@ int oscillate(int pin, unsigned long interval, int start_value, char times)
 * **start_value** `int`: The value to be instantly written to `pin`, reversed after each `interval` ms.
 * **times** `char`: Number of times the `pin` value will oscillate. Use 0 for infinity.
 
-Oscillates the value of the digital `pin` between `HIGH` and `LOW` `times`/2 times starting from
+Oscillates the value of the digital `pin` between `HIGH` and `LOW` N `times` starting from
 `start_value`. `start_value` will be written instantly to the `pin`.
 
 Every `interval` ms the value of `pin` will be reversed.
 
 Returns the **unique id** of the internal timer, you can use the `id` with [`clear_timer`](#clear_timer) to stop it.
+
+Multiple calls on the same MC pin number are safe, they will result in clearing the old timer and starting a new one.
 
 *Since it uses a timer internally (this is just a wrapper around [`set_repeat`](#set_repeat)),
 you have to call [`update_timers`](#update_timers) as you would do with a timer,

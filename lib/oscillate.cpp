@@ -35,18 +35,27 @@
 #include "Arduino.h"
 #include <simple_timer.h>
 
-static int timer_id;
-static int value;
+ typedef struct {
+   unsigned char value;
+   unsigned int timer_id;
+ } pin_t;
+
+static pin_t pin_slots[14] = { [0 ... 13] { 0, -1 } };
 
 int oscillate(int pin, unsigned long interval, int start_value, char times) {
-  value = start_value;
+  pin_slots[pin].pin = pin;
+  pin_slots[pin].value = start_value;
+
+  clear_timer(pin_slots[pin].timer_id);
+  pin_slots[pin].timer_id = set_repeat(interval, toggle_pin, times, pin);
+
   digitalWrite(pin, start_value);
-  clear_timer(timer_id);
-  timer_id = set_repeat(interval, toggle_pin, times, pin);
-  return timer_id;
+
+  return pin_slots[pin].timer_id;
 }
 
-void toggle_pin(int pin) {
-  value ^= 1;
-  digitalWrite(pin, value);
+void toggle_pin(int tick_count, int pin) {
+  pin_t target = pin_slots[pin];
+  target.value ^= 1;
+  digitalWrite(pin, target.value);
 }
