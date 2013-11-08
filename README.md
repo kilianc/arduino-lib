@@ -249,29 +249,30 @@ you can low this number down and save some memory (50 bytes/timer).
 ## `set_repeat`
 
 ```c
-int set_repeat(unsigned int interval, void (*callback)(int arg), unsigned int repeat, ...)
+int set_repeat(unsigned int interval, void (*callback)(int tick_count, int arg), unsigned int repeat, ...)
 ```
 
 * **interval** `unsigned int`: Number of milliseconds to wait before each call to `callback`.
-* **callback** `void (*)(int arg)`: Function to be called repeatedly every `interval` ms `repeat` times.
+* **callback** `void (*)(int tick_count, int arg)`: Function to be called repeatedly every `interval` ms `repeat` times.
 * **repeat** `unsigned int`:  Times the callback will be called.
 * **...** `int`:  Optional parameter forwarded to the callback.
 
 This is the core function of the library, all other functions will refer to this.
 The function creates a new timer that will call `callback` every `interval` ms for `repeat` times
-passing the last optional parameter as actual parameter of `callback`. If you omit the optional
-parameter `callback` will be called with `arg=0`.
+passing the last optional parameter as actual parameter `arg` of `callback`. If you omit the optional
+parameter `callback` will be called with `arg=0`. `tick_count` represents the number of calls
+happened to `callback` so far.
 
 Returns the **unique id** of the timer to be used with [`clear_timer`](#clear_timer) to stop it.
 
 ## `set_interval`
 
 ```c
-int set_interval(unsigned int interval, void (*callback)(int arg))
+int set_interval(unsigned int interval, void (*callback)(int tick_count, int arg))
 ```
 
 * **interval** `unsigned int`: Number of milliseconds to wait before each call to `callback`.
-* **callback** `void (*)(int arg)`: Function to be called repeatedly every `interval` ms `repeat` times.
+* **callback** `void (*)(int tick_count, int arg)`: Function to be called repeatedly every `interval` ms `repeat` times.
 
 Similarly to [`set_repeat`](#set_repeat) calls repeatedly `callback` every `interval` ms **infinitely**.
 
@@ -280,11 +281,11 @@ Returns the **unique id** of the timer to be used with [`clear_timer`](#clear_ti
 ## `set_timeout`
 
 ```c
-int set_timeout(unsigned int interval, void (*callback)(int arg))
+int set_timeout(unsigned int interval, void (*callback)(int tick_count, int arg))
 ```
 
 * **interval** `unsigned int`: Number of milliseconds to wait before each call to `callback`.
-* **callback** `void (*)(int arg)`: Function to be called repeatedly every `interval` ms `repeat` times.
+* **callback** `void (*)(int tick_count, int arg)`: Function to be called repeatedly every `interval` ms `repeat` times.
 
 Similarly to [`set_repeat`](#set_repeat) calls repeatedly `callback` every `interval` ms **just once**.
 

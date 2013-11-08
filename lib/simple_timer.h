@@ -38,9 +38,9 @@
 #ifndef ___SIMPLE_TIMER___
 #define ___SIMPLE_TIMER___
 
-int set_repeat(unsigned int interval, void (*callback)(int arg), unsigned int repeat, ...);
-int set_interval(unsigned int interval, void (*callback)(int arg));
-int set_timeout(unsigned int interval, void (*callback)(int arg));
+int set_repeat(unsigned int interval, void (*callback)(int tick_count, int arg), unsigned int repeat, ...);
+int set_interval(unsigned int interval, void (*callback)(int tick_count, int arg));
+int set_timeout(unsigned int interval, void (*callback)(int tick_count, int arg));
 void update_timers();
 void clear_timer(unsigned int id);
 

@@ -49,7 +49,7 @@ typedef struct {
 static unsigned int uid;
 static timer_t timers_slots[___SIMPLE_TIMER_SLOTS___];
 
-int set_repeat(unsigned int interval, void (*callback)(int arg), unsigned int repeat, ...) {
+int set_repeat(unsigned int interval, void (*callback)(int tick_count, int arg), unsigned int repeat, ...) {
   int i = get_free_slot_index();
 
   if (i == -1)
@@ -72,11 +72,11 @@ int set_repeat(unsigned int interval, void (*callback)(int arg), unsigned int re
   return timers_slots[i].id;
 }
 
-int set_interval(unsigned int interval, void (*callback)(int arg)) {
+int set_interval(unsigned int interval, void (*callback)(int tick_count, int arg)) {
   return set_repeat(interval, callback, 0);
 }
 
-int set_timeout(unsigned int interval, void (*callback)(int arg)) {
+int set_timeout(unsigned int interval, void (*callback)(int tick_count, int arg)) {
   return set_repeat(interval, callback, 1);
 }
 
@@ -88,7 +88,7 @@ void update_timers() {
     if (timers_slots[i].is_running && (ms - timers_slots[i].last_call) >= timers_slots[i].interval) {
       timers_slots[i].last_call = ms;
       timers_slots[i].tick_count++;
-      timers_slots[i].callback(timers_slots[i].arg);
+      timers_slots[i].callback(timers_slots[i].tick_count, timers_slots[i].arg);
       if (timers_slots[i].repeat == timers_slots[i].tick_count) {
         timers_slots[i].is_running = 0;
       }
