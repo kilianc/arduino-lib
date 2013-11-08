@@ -49,7 +49,7 @@ typedef struct {
 static unsigned int uid;
 static timer_t timers_slots[___SIMPLE_TIMER_SLOTS___];
 
-int set_repeat(unsigned int interval, void (*callback)(int arg), int repeat, ...) {
+int set_repeat(unsigned int interval, void (*callback)(int arg), unsigned int repeat, ...) {
   int i = get_free_slot_index();
 
   if (i == -1)
@@ -96,7 +96,7 @@ void update_timers() {
   }
 }
 
-void clear_timer(int id) {
+void clear_timer(unsigned int id) {
   unsigned int i;
   for (i = 0; i < ___SIMPLE_TIMER_SLOTS___; ++i) {
     if (timers_slots[i].id == id)
