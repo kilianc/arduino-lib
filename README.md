@@ -38,17 +38,8 @@
 
 # Installation
 
-Download the library from [here](https://github.com/kilianc/arduino-lib/archive/master.zip) or
-using git `git clone https://github.com/kilianc/arduino-lib`. On OSX/Linux create a symbolic link
-to your Arduino folder:
-
-    $ ln -s /path/to/arduino-lib/lib /path/to/Arduino/libraries/arduinolib
-
-It's important that you use `arduinolib` and not `arduino-lib` as folder name because Arduino IDE
-is a little too picky about libraries' name.
-
-If you are on Windows *(and I feel terribly sorry for you btw)* you can always just copy/paste
-the library in the right place.
+1. Download the library: https://github.com/kilianc/arduino-lib/archive/master.zip
+2. (In the Arduino IDE) Sketch > Include Library > Add .ZIP Library > select the downloaded file > Open
 
 # \<arduino-lib.h\>
 All-in header file. Include this in your sketch and you are ready to use the whole library.
